@@ -110,6 +110,13 @@
        (sleep (/ (* duration 1000) 10)))
   (set-light n "off"))
 
+(define (fade-selected-to-black light-ids (duration 10))
+  ; fades all lights 
+  ; not Windows (uses spawn/sync)
+  ; duration in seconds
+    (dolist (light light-ids)
+        (spawn (sym (string "light" light)) (fade-to-black light duration))))
+
 (define (fade-all-to-black (duration 10))
   ; fades all lights to black
   ; not Windows (uses spawn/sync)
