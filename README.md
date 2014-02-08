@@ -37,26 +37,22 @@ To set the brightness supply a percentage:
 
     (set-brightness n p)
 
-A flashing function: `times` is how many repetitions, `gap` is milliseconds:
+A flashing function: `times` is how many repetitions, `gap` is mark/space in milliseconds:
 
     (flash times gap)
 
-A test function to step through colours in `n` steps:
+Cycle through the colours in a given number of seconds, optionally setting a starting value (between 0 and 65535) and saturation (0 to 255):
 
-    (test-colours steps)
+    (colour-cycle n duration start-value saturation)
+    (colour-cycle-selected light-ids duration saturation)
 
 Fade a light to black (by reducing brightness) and then switch it off, taking `duration` seconds:
 
     (fade-to-black n duration)
 
-The next two functions are not available on Windows, which doesn't offer `sync/spawn` processes:
-
 Fade selected lights to black and then off taking `duration` seconds:
 
     (fade-selected-to-black '(1 3) 10)
- 
-Fade all lights (won't work on Windows as it needs sync/spawn):
-
     (fade-all-to-black duration)
 
 Quickly switch all lights on and brightly:
@@ -67,8 +63,10 @@ Other functions:
 
     (get-all-lights)     - get numbers and names of all lights
     (get-all-light-ids)  - get the numbers of all lights 
-    (test) 
     (get-light n)        - get full details of light `n`
 
 I haven't yet bothered with groups and configurations...
 
+Some of these (`*-selected`) are not available on Windows, which doesn't offer `sync/spawn` processes (the subprocesses do the jobs in parallel).
+
+The whole timing idea based on `sleep` doesn't work, because the lights have delays when being commanded. Another approach using references to absolute time is required.

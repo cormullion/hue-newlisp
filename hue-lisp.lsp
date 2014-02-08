@@ -4,8 +4,12 @@
 ;; @author cormullion
 ;; @description some functions to control the Philips Hue lights
 ;; @location http://github.com/cormullion
-;; @version of date 2014-02-04 15:29:41
+;; @version of date 2014-02-08 10:56:12
 ;; 
+
+;; to do:
+; the use of 'sleep' to control timing doesn't work, because the lights take time 
+; to respond. So sleep needs to be replaced with stricter seconds counting...
 
 (context 'Hue)
 
@@ -83,7 +87,7 @@
                 (format [text]{"on":true, "bri":%d}[/text] value))))))
 
 (define (flash times gap)
-    ; how many cycles, gap in milliseconds
+    ; how many times, gap in milliseconds
      (let ((light-ids (get-all-light-ids)))
         (dotimes (n times)
             (dolist (light light-ids)
@@ -92,30 +96,46 @@
             (dolist (light light-ids)
                 (set-light light "off"))        
             (sleep gap))))
+            
+(define (colour-cycle n (duration 10) (start-value 0) (saturation 255))
+  ; duration is in seconds and is very vague
+  ; start-value lets you start further through the hue cycle than 0
+  (letn ((step 1000)
+         (values (series start-value (fn (x) (mod (add x step) 65535)) (div 65535 step))))
+     (dolist (level values)
+          (set 'sleeptime (sub (div (mul duration 1000) (div 65535 step) 50)))
+          (sleep sleeptime)
+          (set-colour n saturation 255 level))))
 
-(define (test-colours steps)
-    ; step through the colours, rest for a second between each 
-    (let ((light-ids (get-all-light-ids)))
-        (for (i 0 steps)
-            (dolist (light light-ids)
-                (set-colour light 255 255 (* i (/ 65535 steps))))
-            (sleep 1000))))
-
+(define (colour-cycle-selected light-ids (duration 10) (saturation 255))
+  ; not Windows (uses spawn/sync)
+  ; duration in seconds and is very vague
+  ; random starting colour
+    (dolist (light light-ids)
+        (spawn (sym (string "light" light)) (colour-cycle light duration (rand 65535) saturation)))
+    (until (sync 1000) (println " waiting... ")))
+    
 (define (fade-to-black n (duration 10))
   ; duration in seconds
   ; fade a light to black, then switch off
   ; we'll just change the brightness, leaving saturation and hue as they are
-  (for (level 100 0 10)
-       (set-brightness n level)
-       (sleep (/ (* duration 1000) 10)))
-  (set-light n "off"))
+  (let ((steps 1))
+    ; if duration is short, then don't step down by 1 but by 10. 
+    ; This is to avoid sending more than 10 commands per second.
+     (if (< duration 10)
+         (set 'steps 10))
+     (for (level 100 0 steps)
+          (set-brightness n level)
+          (sleep (/ (* duration 1000) 100)))
+    (set-light n "off")))
 
 (define (fade-selected-to-black light-ids (duration 10))
   ; fades all lights 
   ; not Windows (uses spawn/sync)
   ; duration in seconds
     (dolist (light light-ids)
-        (spawn (sym (string "light" light)) (fade-to-black light duration))))
+        (spawn (sym (string "light" light)) (fade-to-black light duration)))
+    (until (sync 1000) (println " waiting... ")))
 
 (define (fade-all-to-black (duration 10))
   ; fades all lights to black
@@ -124,8 +144,7 @@
    (let ((light-ids (Hue:get-all-light-ids)))
     (dolist (light light-ids)
         (spawn (sym (string "light" light)) (fade-to-black light duration)))
-    ; no need to wait :)
-    ;(until (sync 2000) (println " waiting... "))
+    (until (sync 1000) (println " waiting... "))
     ;(println "completed")
     ))
 
@@ -137,13 +156,14 @@
     (get-all-lights)
     (flash 10 1000) ; they're off when this is finished
     (set-all-lights true)
-    (test-colours 10)
+    (colour-cycle-selected '(1 2) 5 255) ; lights 1 and 2, '5 seconds', saturation 255     
     (set-brightness 1 100)
     (set-brightness 2 50)
     (set-brightness 3 20)    
     (fade-to-black 1 10)
     (fade-to-black 2 5)
     (fade-all-to-black 5)
+    (colour-cycle 2 10 255) ; lights 2, '5 seconds', saturation 255  
     (set-light 1 true)
     (quick-on))
 
