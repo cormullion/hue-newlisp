@@ -3,11 +3,11 @@ hue-newlisp
 
 The Philips Hue lights can be easily programmed using newLISP. The Hue context provides the following functions:
 
-First, define the bridge's IP address:
+First, find out the bridge's IP address and insert it into this function call:
 
     (define bridge-IP "192.168.1.1") 
 
-and the user-name (at least 10 characters long):
+Then choose a user-name (it must be at least 10 characters long):
 
     (define user-name "yourusername")
 
@@ -15,9 +15,9 @@ Call
 
     (initialize) 
     
-to introduce yourself to the Philips bridge - you have 10 seconds to hit the button...
+to introduce yourself to the Philips bridge - you have 10 seconds to hit the button after calling this function...
 
-Check if you've already done this step:
+Later you can check if you've already done this step:
 
     (initialized?)
 
@@ -70,3 +70,14 @@ I haven't yet bothered with groups and configurations...
 Some of these (`*-selected`) are not available on Windows, which doesn't offer `sync/spawn` processes (the subprocesses do the jobs in parallel).
 
 The whole timing idea based on `sleep` doesn't work, because the lights have delays when being commanded. Another approach using references to absolute time is required.
+
+# Using Keyboard Maestro
+
+You can easily add commands to Keyboard Maestro. For example:
+
+    Macro Action:
+    Execute Shell Script:
+        #!/usr/bin/env newlisp
+		(load (string (env "HOME") "/projects/hue-newlisp/hue-lisp.lsp"))
+		(Hue:fade-all-to-black 60)
+		(exit)
