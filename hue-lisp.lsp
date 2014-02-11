@@ -4,7 +4,7 @@
 ;; @author cormullion
 ;; @description some functions to control the Philips Hue lights
 ;; @location http://github.com/cormullion
-;; @version of date 2014-02-08 10:56:12
+;; @version of date 2014-02-11 16:16:54
 ;; 
 
 ;; to do:
@@ -81,7 +81,7 @@
                 (format [text]{"on":true, "sat":%d, "bri":%d,"hue":%d}[/text] saturation brightness hue)))))
 
 (define (set-brightness n (percentage 100))
-    (let ((value (max (min (* percentage 2.55) 255) 0))) 
+    (let ((value (max (min (mul percentage 2.55) 255) 0))) 
     (set 'j-response (json-parse
        (put-url (format "http://%s/api/%s/lights/%d/state" bridge-IP user-name n)
                 (format [text]{"on":true, "bri":%d}[/text] value))))))
@@ -126,7 +126,7 @@
          (set 'steps 10))
      (for (level 100 0 steps)
           (set-brightness n level)
-          (sleep (/ (* duration 1000) 100)))
+          (sleep (div (mul duration 1000) 100)))
     (set-light n "off")))
 
 (define (fade-selected-to-black light-ids (duration 10))
