@@ -3,9 +3,13 @@ hue-newlisp
 
 The Philips Hue lights can be easily programmed using newLISP. The Hue context provides the following functions:
 
-First, find out the bridge's IP address and insert it into this function call:
+First, the script attempts to find out the bridge's IP address, using:
 
-    (define bridge-IP "192.168.1.1") 
+	(get-IP)
+   
+This calls 
+
+    https://www.meethue.com/api/nupnp
 
 Then choose a user-name (it must be at least 10 characters long):
 
