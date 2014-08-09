@@ -4,7 +4,7 @@
 ;; @author cormullion
 ;; @description some functions to control the Philips Hue lights
 ;; @location http://github.com/cormullion
-;; @version of date 2014-07-08 08:00:11
+;; @version of date 2014-08-08 17:44:13
 
 ;; to do:
 ; the use of 'sleep' to control timing doesn't work, because the lights take time
@@ -12,8 +12,15 @@
 
 (context 'Hue)
 
-(define bridge-IP "192.168.1.101") ; you need to find this out somehow
 (define user-name "newlispuser")   ; must be at least 10 characters!
+
+(define (get-IP)
+   ; apparently you can get the IP address of the bridge from a service:
+   (set 'j-response
+        (first (exec "curl -s https://www.meethue.com/api/nupnp")))
+   (replace "\\(|\\[|\\]|\\)" j-response "" 0) ; remove excess gubbins for some reason
+   (set 'json (json-parse  j-response))
+   (lookup "internalipaddress" json))
 
 (define (initialize)
     ; first ever communication with the bridge
@@ -166,7 +173,9 @@
     (set-light 1 true)
     (quick-on))
 
-; see if initialize is needed?
+(define bridge-IP (get-IP))
+
+; see if initialization is required?
 
 (if (initialized?) "Hue lights are ready" "Not ready: needs setting up")
 
