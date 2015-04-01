@@ -4,7 +4,7 @@
 ;; @author cormullion
 ;; @description some functions to control the Philips Hue lights
 ;; @location http://github.com/cormullion
-;; @version of date 2014-08-08 17:44:13
+;; @version of date 08:09 March 25 2015
 
 ;; to do:
 ; the use of 'sleep' to control timing doesn't work, because the lights take time
@@ -16,8 +16,9 @@
 
 (define (get-IP)
    ; apparently you can get the IP address of the bridge from a service:
+   ; follow redirects
    (set 'j-response
-        (first (exec "curl -s https://www.meethue.com/api/nupnp")))
+        (first (exec "curl -Ls https://www.meethue.com/api/nupnp")))
    (replace "\\(|\\[|\\]|\\)" j-response "" 0) ; remove excess gubbins for some reason
    (set 'json (json-parse  j-response))
    (lookup "internalipaddress" json))
