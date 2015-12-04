@@ -1,4 +1,4 @@
-#!/usr/bin/env newlisp
+#!/usr/local/bin/newlisp
 
 ;; @module Hue
 ;; @author cormullion
